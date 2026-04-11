@@ -89,11 +89,6 @@ const useStyles = makeStyles({
     fontSize: '24px',
     marginRight: tokens.spacingHorizontalS,
   },
-  customIcon: {
-    fontSize: '20px',
-    marginRight: tokens.spacingHorizontalXS,
-    color: tokens.colorBrandForeground1,
-  },
   avatarSelector: {
     display: 'flex',
     alignItems: 'center',
@@ -254,6 +249,9 @@ export function ScenarioList({
       <Divider style={{ marginTop: tokens.spacingVerticalL }} />
 
       <div className={styles.sectionHeader}>
+        <Text size={400} weight="semibold">
+          Your Custom Scenarios
+        </Text>
         <CustomScenarioEditor onSave={onAddCustomScenario} />
       </div>
 

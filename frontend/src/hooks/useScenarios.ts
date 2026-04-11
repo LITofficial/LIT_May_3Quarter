@@ -87,6 +87,35 @@ export function useScenarios() {
     [selectedScenario]
   )
 
+  // Import a custom scenario from JSON
+  const importCustomScenario = useCallback(
+    (
+      name: string,
+      description: string,
+      jsonData: string
+    ): CustomScenario | null => {
+      const imported = customScenarioService.import(name, description, jsonData)
+      if (imported) {
+        setCustomScenarios(prev => [...prev, imported])
+      }
+      return imported
+    },
+    []
+  )
+
+  // Export a custom scenario to JSON
+  const exportCustomScenario = useCallback((id: string): string | null => {
+    return customScenarioService.export(id)
+  }, [])
+
+  // Check if a scenario is custom
+  const isCustomScenario = useCallback(
+    (id: string): boolean => {
+      return customScenarios.some(s => s.id === id)
+    },
+    [customScenarios]
+  )
+
   return {
     scenarios,
     serverScenarios,
@@ -94,9 +123,13 @@ export function useScenarios() {
     selectedScenario,
     setSelectedScenario,
     loading,
+    // Custom scenario management
     getCustomScenario,
     addCustomScenario,
     updateCustomScenario,
     deleteCustomScenario,
+    importCustomScenario,
+    exportCustomScenario,
+    isCustomScenario,
   }
 }

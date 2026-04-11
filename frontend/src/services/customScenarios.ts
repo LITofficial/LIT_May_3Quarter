@@ -108,10 +108,51 @@ export const customScenarioService = {
   },
 
   /**
-   * Get default system prompt for new scenarios
+   * Import a scenario from JSON data
    */
-  getDefaultSystemPrompt(): string {
-    return `You are a professional playing a specific role in a business scenario.
+  import(
+    name: string,
+    description: string,
+    jsonData: string
+  ): CustomScenario | null {
+    try {
+      const scenarioData = JSON.parse(jsonData) as CustomScenarioData
+
+      // Validate required fields
+      if (!scenarioData.messages || !Array.isArray(scenarioData.messages)) {
+        throw new Error('Invalid scenario format: messages array is required')
+      }
+
+      // Set defaults if not provided
+      scenarioData.model = scenarioData.model || 'gpt-4o'
+      scenarioData.modelParameters = scenarioData.modelParameters || {
+        temperature: 0.7,
+        max_tokens: 2000,
+      }
+
+      return this.save(name, description, scenarioData)
+    } catch (error) {
+      console.error('Failed to import scenario:', error)
+      return null
+    }
+  },
+
+  /**
+   * Create a default template for new scenarios
+   */
+  createTemplate(): CustomScenarioData {
+    return {
+      name: 'New Custom Scenario',
+      description: 'A custom role-play scenario',
+      model: 'gpt-4o',
+      modelParameters: {
+        temperature: 0.7,
+        max_tokens: 2000,
+      },
+      messages: [
+        {
+          role: 'system',
+          content: `You are a professional playing a specific role in a business scenario.
 
 BEHAVIORAL GUIDELINES:
 - Show genuine interest but maintain professional demeanor
@@ -129,7 +170,14 @@ KEY TOPICS TO ADDRESS:
 2. [Topic 2]
 3. [Topic 3]
 
-Respond naturally as this character would, maintaining a professional tone.`
+Respond naturally as this character would, maintaining a professional tone.`,
+        },
+        {
+          role: 'user',
+          content: '{{user_message}}',
+        },
+      ],
+    }
   },
 
   /**

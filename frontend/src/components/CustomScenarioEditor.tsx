@@ -80,7 +80,7 @@ export function CustomScenarioEditor({
   const [name, setName] = useState(scenario?.name || '')
   const [description, setDescription] = useState(scenario?.description || '')
   const [systemPrompt, setSystemPrompt] = useState(
-    scenario?.scenarioData?.systemPrompt || ''
+    scenario?.scenarioData?.messages?.[0]?.content || ''
   )
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -91,11 +91,12 @@ export function CustomScenarioEditor({
     if (scenario) {
       setName(scenario.name)
       setDescription(scenario.description)
-      setSystemPrompt(scenario.scenarioData.systemPrompt)
+      setSystemPrompt(scenario.scenarioData.messages[0]?.content || '')
     } else {
+      const template = customScenarioService.createTemplate()
       setName('')
       setDescription('')
-      setSystemPrompt(customScenarioService.getDefaultSystemPrompt())
+      setSystemPrompt(template.messages[0]?.content || '')
     }
     setError(null)
     setOpen(true)
@@ -111,7 +112,21 @@ export function CustomScenarioEditor({
       return
     }
 
-    onSave(name.trim(), description.trim(), { systemPrompt })
+    const scenarioData: CustomScenarioData = {
+      name: name.trim(),
+      description: description.trim(),
+      model: 'gpt-4o',
+      modelParameters: {
+        temperature: 0.7,
+        max_tokens: 2000,
+      },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: '{{user_message}}' },
+      ],
+    }
+
+    onSave(name.trim(), description.trim(), scenarioData)
     setOpen(false)
   }
 
@@ -150,12 +165,10 @@ export function CustomScenarioEditor({
         const content = e.target?.result as string
         const data = JSON.parse(content) as CustomScenarioData
 
-        if (data.systemPrompt) {
-          setSystemPrompt(data.systemPrompt)
-          setError(null)
-        } else {
-          setError('Invalid format: systemPrompt is required')
-        }
+        setName(data.name || file.name.replace('.json', ''))
+        setDescription(data.description || '')
+        setSystemPrompt(data.messages?.[0]?.content || '')
+        setError(null)
       } catch {
         setError('Failed to parse JSON file')
       }
@@ -224,11 +237,6 @@ export function CustomScenarioEditor({
               The system prompt defines how the AI will behave during the
               role-play. Include character background, behavioral guidelines,
               and key topics to address.
-            </Text>
-
-            <Text className={styles.helpText}>
-              💾 Custom scenarios are stored locally in your browser and won't
-              sync across devices.
             </Text>
 
             {error && <Text className={styles.errorText}>{error}</Text>}

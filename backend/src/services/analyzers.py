@@ -16,12 +16,41 @@ from typing import Any, Dict, List, Optional
 
 import azure.cognitiveservices.speech as speechsdk  # pyright: ignore[reportMissingTypeStubs]
 import yaml
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from openai import AzureOpenAI
+from pydantic import BaseModel
 
 from src.config import config
 from src.services.scenario_utils import determine_scenario_directory
 
 logger = logging.getLogger(__name__)
+
+
+# --- Pydantic models for structured evaluation output ---
+
+
+class SpeakingToneStyle(BaseModel):
+    professional_tone: int
+    active_listening: int
+    engagement_quality: int
+    total: int
+
+
+class ConversationContent(BaseModel):
+    needs_assessment: int
+    value_proposition: int
+    objection_handling: int
+    total: int
+
+
+class SalesEvaluation(BaseModel):
+    speaking_tone_style: SpeakingToneStyle
+    conversation_content: ConversationContent
+    overall_score: int
+    strengths: List[str]
+    improvements: List[str]
+    specific_feedback: str
+
 
 # Constants
 EVALUATION_FILE_SUFFIX = "*evaluation.prompt.yml"
@@ -114,15 +143,25 @@ class ConversationAnalyzer:
             endpoint = config["azure_openai_endpoint"]
             api_key = config["azure_openai_api_key"]
 
-            if not endpoint or not api_key:
-                logger.error("Azure OpenAI endpoint or API key not configured")
+            if not endpoint:
+                logger.error("Azure OpenAI endpoint not configured")
                 return None
 
-            client = AzureOpenAI(
-                api_version=config["api_version"],
-                azure_endpoint=endpoint,
-                api_key=api_key,
-            )
+            if api_key:
+                client = AzureOpenAI(
+                    api_version=config["api_version"],
+                    azure_endpoint=endpoint,
+                    api_key=api_key,
+                )
+            else:
+                token_provider = get_bearer_token_provider(
+                    DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+                )
+                client = AzureOpenAI(
+                    api_version=config["api_version"],
+                    azure_endpoint=endpoint,
+                    azure_ad_token_provider=token_provider,
+                )
 
             logger.info("ConversationAnalyzer initialized with endpoint: %s", endpoint)
             return client
@@ -206,18 +245,18 @@ class ConversationAnalyzer:
 
             completion = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: openai_client.chat.completions.create(
+                lambda: openai_client.beta.chat.completions.parse(
                     model=config["model_deployment_name"],
                     messages=self._build_evaluation_messages(evaluation_prompt),  # pyright: ignore[reportArgumentType]
-                    response_format=self._get_response_format(),  # pyright: ignore[reportArgumentType]
+                    response_format=SalesEvaluation,
                 ),
             )
 
-            if completion.choices[0].message.content:
-                evaluation_json = json.loads(completion.choices[0].message.content)
-                return self._process_evaluation_result(evaluation_json)
+            parsed = completion.choices[0].message.parsed
+            if parsed:
+                return self._process_evaluation_result(parsed.model_dump())
 
-            logger.error("No content received from OpenAI")
+            logger.error("No parsed content received from OpenAI")
             return None
 
         except Exception as e:
@@ -234,72 +273,6 @@ class ConversationAnalyzer:
             },
             {"role": "user", "content": evaluation_prompt},
         ]
-
-    def _get_response_format(self) -> Dict[str, Any]:
-        """Get the structured response format for OpenAI."""
-        return {
-            "type": "json_schema",
-            "json_schema": {
-                "name": "sales_evaluation",
-                "strict": True,
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "speaking_tone_style": {
-                            "type": "object",
-                            "properties": {
-                                "professional_tone": {"type": "integer"},
-                                "active_listening": {"type": "integer"},
-                                "engagement_quality": {"type": "integer"},
-                                "total": {"type": "integer"},
-                            },
-                            "required": [
-                                "professional_tone",
-                                "active_listening",
-                                "engagement_quality",
-                                "total",
-                            ],
-                            "additionalProperties": False,
-                        },
-                        "conversation_content": {
-                            "type": "object",
-                            "properties": {
-                                "needs_assessment": {"type": "integer"},
-                                "value_proposition": {"type": "integer"},
-                                "objection_handling": {"type": "integer"},
-                                "total": {"type": "integer"},
-                            },
-                            "required": [
-                                "needs_assessment",
-                                "value_proposition",
-                                "objection_handling",
-                                "total",
-                            ],
-                            "additionalProperties": False,
-                        },
-                        "overall_score": {"type": "integer"},
-                        "strengths": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                        },
-                        "improvements": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                        },
-                        "specific_feedback": {"type": "string"},
-                    },
-                    "required": [
-                        "speaking_tone_style",
-                        "conversation_content",
-                        "overall_score",
-                        "strengths",
-                        "improvements",
-                        "specific_feedback",
-                    ],
-                    "additionalProperties": False,
-                },
-            },
-        }
 
     def _process_evaluation_result(self, evaluation_json: Dict[str, Any]) -> Dict[str, Any]:
         """Process and validate evaluation results."""
@@ -330,6 +303,7 @@ class PronunciationAssessor:
         """Initialize the pronunciation assessor."""
         self.speech_key = config["azure_speech_key"]
         self.speech_region = config["azure_speech_region"]
+        self.speech_endpoint = config.get("azure_speech_endpoint", "")
 
     def _create_wav_audio(self, audio_bytes: bytearray) -> bytes:
         """Create WAV format audio from raw PCM bytes."""
@@ -353,7 +327,17 @@ class PronunciationAssessor:
 
     def _create_speech_config(self) -> speechsdk.SpeechConfig:
         """Create speech configuration."""
-        speech_config = speechsdk.SpeechConfig(subscription=self.speech_key, region=self.speech_region)
+        if self.speech_key:
+            speech_config = speechsdk.SpeechConfig(subscription=self.speech_key, region=self.speech_region)
+        else:
+            credential = DefaultAzureCredential()
+            token = credential.get_token("https://cognitiveservices.azure.com/.default")
+            if self.speech_endpoint:
+                # Custom domain: must use endpoint= and set authorization_token separately
+                speech_config = speechsdk.SpeechConfig(endpoint=self.speech_endpoint)
+                speech_config.authorization_token = token.token
+            else:
+                speech_config = speechsdk.SpeechConfig(auth_token=token.token, region=self.speech_region)
         speech_config.speech_recognition_language = config["azure_speech_language"]
         return speech_config
 
@@ -411,8 +395,8 @@ class PronunciationAssessor:
         Returns:
             Optional[Dict[str, Any]]: Pronunciation assessment results or None if assessment fails
         """
-        if not self.speech_key:
-            logger.error("Azure Speech key not configured")
+        if not self.speech_key and not self.speech_endpoint:
+            logger.error("Azure Speech not configured (no key or endpoint)")
             return None
 
         try:
@@ -478,8 +462,8 @@ class PronunciationAssessor:
             logger.error(
                 "Speech recognition canceled: reason=%s, error_code=%s, error_details=%s",
                 cancellation.reason,
-                cancellation.error_code,
-                cancellation.error_details,
+                getattr(cancellation, "error_code", "unknown"),
+                getattr(cancellation, "error_details", "unknown"),
             )
             return None
 

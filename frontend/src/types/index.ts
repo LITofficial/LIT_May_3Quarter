@@ -13,7 +13,17 @@ export interface Scenario {
 }
 
 export interface CustomScenarioData {
-  systemPrompt: string
+  name: string
+  description: string
+  model: string
+  modelParameters: {
+    temperature: number
+    max_tokens: number
+  }
+  messages: Array<{
+    role: 'system' | 'user'
+    content: string
+  }>
 }
 
 export interface CustomScenario extends Scenario {

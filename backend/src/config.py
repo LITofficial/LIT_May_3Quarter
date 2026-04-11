@@ -16,8 +16,8 @@ load_dotenv()
 DEFAULT_PORT = 8000
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_REGION = "swedencentral"
-DEFAULT_MODEL = "gpt-4o"
-DEFAULT_API_VERSION = "2024-12-01-preview"
+DEFAULT_MODEL = "gpt-4.1-mini"
+DEFAULT_API_VERSION = "2025-04-01-preview"
 DEFAULT_SPEECH_LANGUAGE = "en-US"
 DEFAULT_INPUT_TRANSCRIPTION_MODEL = "azure-speech"
 DEFAULT_INPUT_NOISE_REDUCTION_TYPE = "azure_deep_noise_suppression"
@@ -52,6 +52,7 @@ class Config:
             "resource_group_name": os.getenv("RESOURCE_GROUP_NAME", ""),
             "azure_speech_key": os.getenv("AZURE_SPEECH_KEY", ""),
             "azure_speech_region": os.getenv("AZURE_SPEECH_REGION", DEFAULT_REGION),
+            "azure_speech_endpoint": os.getenv("AZURE_SPEECH_ENDPOINT", ""),
             "azure_speech_language": os.getenv("AZURE_SPEECH_LANGUAGE", DEFAULT_SPEECH_LANGUAGE),
             "api_version": DEFAULT_API_VERSION,
             # NEW ADDITIONS

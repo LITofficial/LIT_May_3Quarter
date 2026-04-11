@@ -64,13 +64,11 @@ export const api = {
   },
 
   /**
-   * Create an agent with a custom scenario
-   * Transforms the simplified scenario data into the backend format
+   * Create an agent with a custom scenario (not stored on server)
+   * The scenario data is passed directly to the backend
    */
   async createAgentWithCustomScenario(
     scenarioId: string,
-    name: string,
-    description: string,
     scenarioData: CustomScenarioData,
     avatarConfig?: AvatarConfig
   ) {
@@ -80,9 +78,7 @@ export const api = {
       body: JSON.stringify({
         custom_scenario: {
           id: scenarioId,
-          name,
-          description,
-          messages: [{ role: 'system', content: scenarioData.systemPrompt }],
+          ...scenarioData,
         },
         avatar: avatarConfig,
       }),
