@@ -2,4 +2,4 @@
 
 
 ### 1차 피드백 
-https://www.notion.so/1-351821aaca7480da96decb160c548e1e?source=copy_link
+https://www.notion.so/Microsoft-Foundry-Voice-Live-API-AI-34a821aaca7480c3aad9fa616ed3a1fc?source=copy_link
