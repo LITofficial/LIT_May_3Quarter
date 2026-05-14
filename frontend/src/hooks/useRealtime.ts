@@ -30,6 +30,9 @@ export function useRealtime(options: RealtimeOptions) {
     ws.onopen = () => {
       setConnected(true)
       if (options.agentId) {
+        // 포인트:
+        // WebSocket이 열리면 먼저 사용할 Agent ID를 보냅니다.
+        // 서버는 이 ID로 시나리오 지시문과 모델 설정을 찾아 Voice Live 세션에 연결합니다.
         ws.send(
           JSON.stringify({
             type: 'session.update',
@@ -46,6 +49,7 @@ export function useRealtime(options: RealtimeOptions) {
       switch (msg.type) {
         case 'response.audio.delta':
           if (msg.delta) {
+            // AI 답변 음성이 완성될 때까지 기다리지 않고, 생성되는 오디오 조각을 즉시 재생합니다.
             options.onAudioDelta?.(msg.delta)
             audioRecording.current.push({
               type: 'assistant',
@@ -56,6 +60,7 @@ export function useRealtime(options: RealtimeOptions) {
           break
         case 'conversation.item.input_audio_transcription.completed':
           if (msg.transcript) {
+            // 사용자의 음성이 Speech-to-Text로 확정되면 채팅 패널에 사용자 문장으로 표시합니다.
             const message: Message = {
               id: crypto.randomUUID(),
               role: 'user',
@@ -72,6 +77,7 @@ export function useRealtime(options: RealtimeOptions) {
           break
         case 'response.audio_transcript.done':
           if (msg.transcript) {
+            // LLM이 만든 답변은 Text-to-Speech로 나가면서 동시에 텍스트 transcript도 받습니다.
             const message: Message = {
               id: crypto.randomUUID(),
               role: 'assistant',

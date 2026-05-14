@@ -93,6 +93,10 @@ class VoiceProxyHandler:
                 await self._send_error(client_ws, "No API key found in configuration")
                 return
 
+            # 포인트:
+            # 여기서 백엔드가 Azure Voice Live API와 WebSocket 기반 실시간 세션을 엽니다.
+            # 브라우저는 이 서버에만 연결하고, 서버가 Azure와의 인증/모델/Agent 연결을
+            # 대신 처리하는 프록시 역할을 합니다.
             async with connect(
                 endpoint=endpoint,
                 credential=credential,
@@ -225,14 +229,22 @@ class VoiceProxyHandler:
         """Create the RequestSession with all configuration."""
         session = RequestSession(
             modalities=[Modality.TEXT, Modality.AUDIO, Modality.AVATAR],
+            # Azure Semantic VAD가 사용자의 말이 끝났는지, 잠깐 쉰 것인지 판단합니다.
+            # 이 턴 종료 감지가 자연스러운 대화 타이밍의 핵심입니다.
             turn_detection=AzureSemanticVad(type=DEFAULT_TURN_DETECTION_TYPE),
+            # Voice Live API가 입력 오디오의 노이즈와 에코를 줄여서,
+            # AI가 자기 목소리를 다시 듣거나 주변 소음에 흔들리는 상황을 줄입니다.
             input_audio_noise_reduction=AudioNoiseReduction(type=DEFAULT_NOISE_REDUCTION_TYPE),
             input_audio_echo_cancellation=AudioEchoCancellation(type=DEFAULT_ECHO_CANCELLATION_TYPE),
+            # LLM 답변을 바로 음성으로 합성할 목소리를 지정합니다.
             voice=AzureStandardVoice(name=voice_name, type=voice_type),
+            # 음성 출력과 동기화되는 아바타 설정입니다.
             avatar=avatar_config_value,
         )
 
         if agent_config and not agent_config.get("is_azure_agent"):
+            # 시나리오별 역할 지시문을 세션에 주입해서 "영어 코치", "면접관",
+            # "카페 직원"처럼 상황에 맞는 Agent로 행동하게 합니다.
             session["instructions"] = agent_config.get("instructions")
             session["temperature"] = agent_config.get("temperature")
             session["max_response_output_tokens"] = agent_config.get("max_tokens")
@@ -245,6 +257,10 @@ class VoiceProxyHandler:
         azure_conn: VoiceLiveConnection,
     ) -> None:
         """Handle bidirectional message forwarding."""
+        # 포인트:
+        # 두 방향을 동시에 처리합니다. 사용자의 오디오는 Azure로 계속 보내고,
+        # Azure에서 생성되는 전사/LLM/TTS/아바타 이벤트는 즉시 브라우저로 돌려보냅니다.
+        # 그래서 요청 하나가 끝나기를 기다리는 HTTP 방식보다 대화 지연이 훨씬 적습니다.
         tasks = [
             asyncio.create_task(self._forward_client_to_azure(client_ws, azure_conn)),
             asyncio.create_task(self._forward_azure_to_client(azure_conn, client_ws)),
@@ -278,6 +294,8 @@ class VoiceProxyHandler:
 
                 if isinstance(message, str):
                     parsed = json.loads(message)
+                    # 예: input_audio_buffer.append 이벤트에는 브라우저 마이크 오디오 조각이 담깁니다.
+                    # 이 작은 조각들이 계속 들어가기 때문에 사용자가 말하는 중에도 처리가 시작됩니다.
                     await azure_conn.send(parsed)
                 else:
                     await azure_conn.send(message)
@@ -299,6 +317,8 @@ class VoiceProxyHandler:
                 message = json.dumps(event_dict)
                 logger.debug("Azure->Client: %s", message[:LOG_MESSAGE_MAX_LENGTH])
 
+                # 예: 전사 완료, 응답 오디오 delta, 아바타 WebRTC SDP 같은 서버 이벤트를
+                # 그대로 브라우저로 전달합니다. 프론트엔드는 이벤트 타입별로 UI/오디오를 갱신합니다.
                 await asyncio.get_event_loop().run_in_executor(
                     None,
                     client_ws.send,  # pyright: ignore[reportUnknownArgumentType,reportUnknownMemberType]

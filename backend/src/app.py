@@ -216,6 +216,10 @@ def audio_processor():
 def voice_proxy(ws: simple_websocket.ws.Server):
     """WebSocket endpoint for voice proxy."""
 
+    # 포인트:
+    # HTTP처럼 요청/응답 후 연결을 끊는 방식이 아니라, 브라우저와 서버 사이에
+    # WebSocket 연결을 계속 열어둡니다. 이 연결 위에서 마이크 오디오,
+    # 전사 결과, AI 응답 음성, 아바타 연결 이벤트가 실시간으로 오갑니다.
     logger.info("New WebSocket connection")
 
     try:

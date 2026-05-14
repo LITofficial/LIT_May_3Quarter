@@ -197,18 +197,18 @@ CRITICAL INTERACTION GUIDELINES:
         self, scenario_id: str, scenario_data: Dict[str, Any], avatar_config: Optional[Dict[str, Any]] = None
     ) -> str:
         """
-        Create a new virtual agent for a scenario.
+        시나리오에 맞는 새 가상 Agent를 생성합니다.
 
-        Args:
-            scenario_id: The scenario identifier
-            scenario_data: The scenario configuration data
-            avatar_config: Optional avatar configuration with character, style, is_photo_avatar
+        인자:
+            scenario_id: 시나리오 식별자
+            scenario_data: 시나리오 설정 데이터
+            avatar_config: 캐릭터, 스타일, 포토 아바타 여부를 포함한 선택적 아바타 설정
 
-        Returns:
-            str: The created agent's ID
+        반환:
+            str: 생성된 Agent의 ID
 
-        Raises:
-            Exception: If agent creation fails
+        예외:
+            Exception: Agent 생성에 실패한 경우
         """
 
         scenario_instructions = scenario_data.get("messages", [{}])[0].get("content", "")
@@ -285,6 +285,9 @@ CRITICAL INTERACTION GUIDELINES:
         try:
             agent_id = self._generate_local_agent_id(scenario_id)
 
+            # 포인트:
+            # MS Foundry의 Agent Service를 쓰지 않는 경우에도 역할 지시문은 로컬 설정으로 보관합니다.
+            # 이후 Voice Live 세션을 만들 때 이 instructions를 주입해서 영어 코치 역할을 수행시킵니다.
             self.agents[agent_id] = self._create_agent_config(
                 scenario_id=scenario_id,
                 agent_id=agent_id,

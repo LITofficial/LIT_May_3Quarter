@@ -122,6 +122,7 @@ export default function App() {
 
   const sendOffer = useCallback(
     (sdp: string) => {
+      // 아바타 영상/음성 스트림을 받기 위해 브라우저의 WebRTC offer를 Voice Live 세션으로 보냅니다.
       send({ type: 'session.avatar.connect', client_sdp: sdp })
     },
     [send]
@@ -131,6 +132,8 @@ export default function App() {
 
   const sendAudioChunk = useCallback(
     (base64: string) => {
+      // 마이크에서 들어온 오디오 조각을 끊지 않고 계속 전송합니다.
+      // Voice Live API는 이 스트림 위에서 STT, 턴 감지, LLM 응답, TTS를 이어서 처리합니다.
       send({ type: 'input_audio_buffer.append', audio: base64 })
     },
     [send]
