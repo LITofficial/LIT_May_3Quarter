@@ -13,154 +13,876 @@ products:
 - azure-speech
 - azure
 page_type: sample
-urlFragment: voicelive-api-salescoach
+urlFragment: voicelive-api
 ---
 -->
 <p align="center">
-   <h1 align="center">Voice Live API: AI Sales Coach</h1>
+   <h1 align="centerLIT 5월 정기발표 - 이동수, 이서진, 홍준기</h1>
 </p>
-<p align="center">A demo application showcasing AI-powered voice training for sales professionals, built on Azure.</p>
+<p align="center">나만의 AI 영어 스피킹 코치 만들기</p>
 <p align="center">
    <a href="https://github.com/Azure-Samples/voicelive-api-salescoach/blob/main/LICENSE.md"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg" style="height:27px; vertical-align:middle;"/></a>
    <a href="https://github.com/Azure-Samples/voicelive-api-salescoach/actions/workflows/lint-and-test.yml"><img alt="Build Status" src="https://github.com/Azure-Samples/voicelive-api-salescoach/actions/workflows/lint-and-test.yml/badge.svg" style="height:27px; vertical-align:middle;"/></a>&nbsp;
    <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fvoicelive-api-salescoach%2Frefs%2Fheads%2Fmain%2Finfra%2Fdeployment.json"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" style="height:27px; vertical-align:middle;"/></a>&nbsp;
 </p>
 
-![Voice Live API Salescoach in Action](docs/assets/preview.png)
+---
+## 발표 주제
+
+**나만의 AI 영어 스피킹 코치 만들기**
+
+이번 발표에서는 Microsoft Foundry의 **Azure Voice Live API**를 이용해서, 사용자가 영어로 말하면 AI가 실시간으로 듣고 이해한 뒤 다시 음성으로 답변하는 **AI 영어 스피킹 코치**를 만드는 과정을 설명합니다.
+
+단순히 텍스트로 질문하고 답변받는 챗봇이 아니라, 실제 사람과 대화하듯이 음성으로 말하고 음성으로 답변받는 구조를 다룹니다.
 
 ---
 
-## Overview
+# 문제상황 제시
 
-Voice Live API Salescoach is a demo application showcasing how AI-based training could be used in sales education using Azure AI services. Practice real-world sales scenarios with AI-powered virtual customers, receive instant feedback on your performance, and improve your sales skills through immersive voice conversations.
+---
 
-### Features
+## 실시간 음성 AI 서비스가 필요해지는 상황
 
-- **Real-time Voice Conversations** - Practice sales calls with AI agents that respond naturally using Azure Voice Live API
-- **Performance Analysis** - Get detailed feedback on your conversation skills
-- **Pronunciation Assessment** - Improve your speaking clarity and confidence with Azure Speech Services
-- **Scoring System** - Track your progress with metrics
+혹시 여러분이 만든 서비스에 **실시간 음성 AI 기능**을 붙이고 싶다고 생각해본 적 있나요?
 
-![Performance Analysis Dashboard](docs/assets/analysis.png)
+예를 들어 다음과 같은 서비스가 있을 수 있습니다.
 
-## Demo
+영어 코치 앱에서는 사용자가 영어로 말하면 AI가 바로 듣고, 문장을 이해하고, 더 자연스러운 표현을 알려줘야 합니다.
 
-See the Voice Live API Salescoach in action:
+상담봇에서는 고객이 말로 질문하면 AI가 내용을 이해하고 바로 답변해야 합니다.
 
-https://github.com/user-attachments/assets/904f1555-6981-4780-ae64-c5757337bcad
+면접 연습 서비스에서는 사용자가 답변을 말하면 AI가 그 답변을 듣고 피드백을 제공해야 합니다.
 
-### How It Works
+고객 응대 서비스에서는 사용자가 키보드로 입력하지 않아도, 말로 문의하고 말로 답변받을 수 있어야 합니다.
 
-1. **Choose a Scenario** - Select from various industry-specific sales situations
-2. **Start the Conversation** - Click the microphone to start your simulation
-3. **Engage with AI** - The virtual customer responds realistically based on the scenario
-4. **Receive Feedback** - Get instant analysis on your performance including:
-   - Speaking tone and style
-   - Content quality
-   - Needs assessment
-   - Value proposition delivery
-   - Objection handling skills
+이런 기능이 잘 구현되면 단순한 챗봇을 넘어, 실제 사용자 경험을 바꾸는 서비스가 될 수 있습니다.
 
-## Getting Started
+---
 
-### Deploy to Azure
+## 듀오링고 사례
 
-1. **Deploy to Azure**:
-   ```bash
-   azd up
-   ```
-2. **Access your application**:
-   The deployment will output the URL where your application is running.
+대표적인 예시로 **듀오링고**가 있습니다.
 
-### Local Development
+듀오링고는 단어를 외우거나 문제를 푸는 방식에서 더 나아가, AI와 직접 대화하면서 언어를 학습하는 기능을 제공하고 있습니다.
 
-This project includes a dev container for easy setup and a build script for  development.
+영어 공부를 할 때 단순히 문장을 눈으로 읽는 것보다, 직접 입 밖으로 말하고 AI와 대화하는 방식이 훨씬 실전적입니다.
 
-1. **Use Dev Container** (Recommended)
-   - Open in VS Code and select "Reopen in Container" when prompted
-   - All dependencies and tools are pre-configured
+그래서 이번 발표에서는 듀오링고처럼 사용자가 영어로 말하면 AI가 듣고 답변하는 **AI 영어 스피킹 코치**를 직접 만든다고 가정합니다.
 
-2. **Fill in the .env file**
-   - Copy `.env.template` to `.env`
-   - Fill in your Azure AI Foundry and Speech service keys and endpoints (you can run `azd provision` to create these resources if you haven't already)
+---
 
-3. **Build and run**
-   ```bash
-   # Build the application
-   ./scripts/build.sh
+# 실시간 음성 AI를 직접 만들려면 필요한 것
 
-   # Start the server
-   cd backend && python src/app.py
-   ```
+---
 
-Visit `http://localhost:8000` to start training!
+## GPT API 하나만으로는 부족하다
 
-## Architecture
+먼저 생각해봐야 할 질문은 이것입니다.
 
-<table>
-<tr>
-<td width="400">
-<img src="docs/assets/architecture.png" alt="Architecture Diagram" width="500"/>
-</td>
-<td>
+**실시간 음성 AI 서비스를 만들려면 무엇이 필요할까요?**
 
-The application leverages multiple Azure AI services to deliver real-time voice-based sales training:
+단순히 GPT API 하나만 연결한다고 해서 바로 사람처럼 말하고 대답하는 서비스가 만들어지는 것은 아닙니다.
 
-- **Azure AI Foundry** - AI platform including:
-  - Voice Live API for real-time speech-to-speech conversations and avatar simulation
-  - Large language models (GPT-4o) as underlying LLM for performance analysis
-  - Speech Services for post-conversation pronunciation and fluency assessment
-  - Optional AI Agent Service
-- **React + Fluent UI** - Modern web interface
-- **Python Flask** - Backend API and WebSocket communication
+GPT 같은 LLM은 기본적으로 텍스트를 입력받고 텍스트를 출력합니다.
 
-**Conversation Flow:** User speech → Voice Live API → GPT-4o processing → AI agent response → Performance analysis → Detailed feedback
+하지만 우리가 만들고 싶은 서비스는 사용자가 **음성으로 말하고**, AI도 **음성으로 답하는 서비스**입니다.
 
-</td>
-</tr>
-</table>
+따라서 음성 대화 서비스를 만들기 위해서는 텍스트 챗봇보다 더 많은 기능이 필요합니다.
 
+---
 
-## Contributors
-<p float="left">
-  <a href="https://github.com/aymenfurter"><img src="https://github.com/aymenfurter.png" width="100" height="100" alt="aymenfurter" style="border-radius:50%;"/></a>
-  <a href="https://github.com/curia-damiano"><img src="https://github.com/curia-damiano.png" width="100" height="100" alt="curia-damiano" style="border-radius:50%;"/></a>
-  <a href="https://github.com/TiffanyZ4Msft"><img src="https://github.com/TiffanyZ4Msft.png" width="100" height="100" alt="TiffanyZ4Msft.png" style="border-radius:50%;"/></a>
-</p>
+## 1. STT: 음성을 텍스트로 바꾸는 기능
 
-## Contributing
+먼저 필요한 것은 **음성을 듣는 기능**입니다.
 
-This project welcomes contributions and suggestions. Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+사용자가 영어로 말을 하면 컴퓨터는 그 소리를 바로 의미 있는 문장으로 이해하지 못합니다.
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+그래서 사용자의 음성을 텍스트로 바꾸는 과정이 필요합니다.
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+이것이 바로 **Speech-to-Text**, 줄여서 **STT**입니다.
 
-## Security
+예를 들어 사용자가 이렇게 말했다고 가정합니다.
 
-Microsoft takes the security of our software products and services seriously, which includes all source code repositories managed through our GitHub organizations, which include [Microsoft](https://github.com/Microsoft), [Azure](https://github.com/Azure), [DotNet](https://github.com/dotnet), [AspNet](https://github.com/aspnet) and [Xamarin](https://github.com/xamarin).
+```
+I want to practice English.
+```
 
-If you believe you have found a security vulnerability in any Microsoft-owned repository that meets [Microsoft's definition of a security vulnerability](https://aka.ms/security.md/definition), please report it to us as described in [SECURITY.md](SECURITY.md).
+시스템은 이 음성을 받아서 텍스트 문장으로 변환해야 합니다.
 
-## Trademarks
+```
+사용자 음성 입력
+→ STT
+→ 텍스트 출력
+```
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
-trademarks or logos is subject to and must follow
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+즉, STT는 AI 영어 코치가 사용자의 말을 이해하기 위한 첫 번째 단계입니다.
 
+---
 
+## 2. LLM: 텍스트를 이해하고 답변을 생성하는 기능
 
-<p align="center">
-   <br/>
-   <br/>
-   Made with ❤️ in 🇨🇭
-</p>
+음성을 텍스트로 바꿨다고 해서 끝나는 것은 아닙니다.
+
+이제 그 문장이 무슨 뜻인지 이해하고, 상황에 맞는 답변을 만들어야 합니다.
+
+이 역할을 하는 것이 바로 **LLM**입니다.
+
+GPT 같은 대규모 언어 모델은 사용자의 문장을 이해하고, 자연스러운 답변을 생성합니다.
+
+영어 코치 서비스에서는 LLM이 단순히 대답만 하는 것이 아니라, 사용자의 영어 문장이 어색할 경우 더 자연스러운 표현도 추천할 수 있습니다.
+
+예를 들어 사용자가 어색한 영어 문장을 말하면 AI는 이렇게 답변할 수 있습니다.
+
+```
+이 문장은 "I want to practice English"라고 말하는 것이 더 자연스럽습니다.
+```
+
+즉, LLM은 AI 영어 코치의 **생각하는 부분**입니다.
+
+```
+사용자 입력
+→ 의미 이해
+→ 답변 생성
+```
+
+---
+
+## 3. TTS: 생성된 답변을 다시 음성으로 바꾸는 기능
+
+마지막으로 필요한 것은 AI가 만든 답변을 다시 음성으로 말해주는 기능입니다.
+
+AI가 답변을 텍스트로 만들었다면, 영어 스피킹 코치 서비스에서는 이 답변을 다시 음성으로 들려줘야 합니다.
+
+이 과정이 바로 **Text-to-Speech**, 줄여서 **TTS**입니다.
+
+```
+생성된 답변
+→ TTS
+→ 음성 출력
+```
+
+즉, 사용자가 말하면 시스템은 다음 흐름으로 동작해야 합니다.
+
+```
+사용자 음성
+→ STT
+→ 텍스트 변환
+→ LLM
+→ 답변 생성
+→ TTS
+→ AI 음성 출력
+```
+
+---
+
+## 기본 구조 정리
+
+실시간 음성 AI 서비스를 만들기 위해 필요한 핵심 기능은 세 가지입니다.
+
+```
+STT  →  LLM  →  TTS
+```
+
+STT는 사용자의 음성을 텍스트로 바꿉니다.
+
+LLM은 텍스트를 이해하고 답변을 생성합니다.
+
+TTS는 생성된 답변을 다시 음성으로 변환합니다.
+
+여기까지 보면 구조는 단순해 보입니다.
+
+하지만 진짜 문제는 이 세 기능을 **어떻게 실시간으로 연결할 것인가**입니다.
+
+---
+
+# HTTP 방식의 한계
+
+---
+
+## 가장 익숙한 방식: HTTP API
+
+일반적으로 웹 개발에서 가장 많이 사용하는 방식은 **HTTP API**입니다.
+
+HTTP는 클라이언트가 서버에 요청을 보내고, 서버가 응답을 돌려주는 구조입니다.
+
+예를 들어 사용자가 질문을 하면 서버가 답변을 반환합니다.
+
+```
+요청 → 응답
+```
+
+이 구조는 일반적인 웹 서비스에는 매우 잘 맞습니다.
+
+게시글을 불러오거나, 로그인 요청을 보내거나, 날씨 정보를 가져오는 것처럼 한 번 요청하고 한 번 응답받는 상황에서는 HTTP가 편리합니다.
+
+---
+
+## HTTP의 구조
+
+HTTP는 기본적으로 다음과 같이 동작합니다.
+
+```
+요청 → 응답 → 종료
+```
+
+예를 들어 사용자가 이렇게 물어봅니다.
+
+```
+요청: 오늘의 날씨는?
+응답: 맑습니다.
+```
+
+서버가 응답을 보내면 그 요청은 끝납니다.
+
+이처럼 HTTP는 하나의 요청에 하나의 응답을 주고받는 구조입니다.
+
+---
+
+## 실시간 음성 대화에서 HTTP가 불편한 이유
+
+하지만 사람의 대화는 이렇게 끊어지지 않습니다.
+
+사용자가 말하는 도중에도 음성이 계속 들어옵니다.
+
+잠깐 멈췄다가 다시 말할 수도 있습니다.
+
+AI가 말하는 도중에 사용자가 끼어들 수도 있습니다.
+
+또 사용자가 처음에는 “오늘의 날씨는?”이라고 말하다가 중간에 질문을 바꾸고 싶을 수도 있습니다.
+
+그런데 HTTP 구조에서는 요청을 한 번 보내고 응답을 받으면 흐름이 종료됩니다.
+
+실시간 음성 대화처럼 계속 이어지는 데이터 흐름에는 잘 맞지 않습니다.
+
+즉, 실시간 음성 AI에서는 한 번의 요청과 한 번의 응답이 아니라, 계속 이어지는 연결이 필요합니다.
+
+---
+
+# WebSocket이 필요한 이유
+
+---
+
+## WebSocket의 등장
+
+실시간 음성 대화에서는 HTTP처럼 매번 요청하고 응답받는 방식보다, 연결을 계속 유지하면서 데이터를 주고받는 방식이 필요합니다.
+
+이때 사용하는 방식이 **WebSocket**입니다.
+
+WebSocket은 처음에 한 번 연결을 맺으면, 그 연결을 계속 유지한 상태로 클라이언트와 서버가 실시간으로 데이터를 주고받을 수 있습니다.
+
+```
+HTTP
+요청 → 응답
+요청 → 응답
+요청 → 응답
+
+WebSocket
+연결 유지
+↔ 실시간 데이터 송수신
+```
+
+---
+
+## HTTP와 WebSocket의 차이
+
+쉽게 비유하면 HTTP는 전화를 걸고 질문 하나를 한 뒤, 답을 듣고 전화를 끊는 방식입니다.
+
+반면 WebSocket은 전화 통화를 계속 연결해 둔 상태에서 서로 말하는 방식에 가깝습니다.
+
+그래서 사용자가 말하는 음성이 조금씩 계속 서버로 전달될 수 있습니다.
+
+서버도 AI의 응답을 실시간으로 다시 사용자에게 보낼 수 있습니다.
+
+이 덕분에 사용자가 말을 이어가거나, 중간에 말을 고치거나, AI가 말하는 도중에 사용자가 끼어드는 상황도 더 자연스럽게 처리할 수 있습니다.
+
+즉, 실시간 음성 AI에서는 단순한 요청-응답 구조보다 **계속 연결된 대화 채널**이 필요합니다.
+
+이 역할을 하는 것이 WebSocket입니다.
+
+---
+
+# 직접 구현할 때의 복잡함
+
+---
+
+## 필요한 기능이 너무 많다
+
+이제 기본 구조를 알았으니 직접 구현해볼 수 있을 것 같습니다.
+
+하지만 실제로 만들려고 하면 해야 할 일이 매우 많습니다.
+
+먼저 마이크 입력을 받아야 합니다.
+
+그다음 STT를 연결해야 합니다.
+
+LLM API를 붙여서 답변을 생성해야 합니다.
+
+TTS를 연결해서 답변을 다시 음성으로 바꿔야 합니다.
+
+생성된 음성을 사용자에게 다시 보내야 합니다.
+
+여기까지도 이미 복잡하지만, 실시간 대화에서는 추가로 더 많은 처리가 필요합니다.
+
+---
+
+## 실시간 대화 시스템에서 필요한 추가 처리
+
+실시간으로 음성이 들어오기 때문에 오디오 스트리밍 처리가 필요합니다.
+
+음성이 끊기지 않도록 버퍼 관리도 해야 합니다.
+
+사용자가 말하는 중인지, AI가 응답하는 중인지 상태 관리도 필요합니다.
+
+연결이 끊기거나 오류가 발생했을 때를 대비한 에러 처리도 해야 합니다.
+
+즉, 단순히 API 몇 개를 붙이는 수준이 아닙니다.
+
+거의 실시간 대화 시스템을 직접 만드는 수준으로 난이도가 올라갑니다.
+
+```
+STT
+LLM
+TTS
+오디오 스트리밍
+버퍼 관리
+상태 관리
+에러 처리
+```
+
+여기까지 들으면 자연스럽게 이런 생각이 듭니다.
+
+**이걸 언제 다 만들고 있나요?**
+
+---
+
+# 해결방안 제시
+
+---
+
+## Azure Voice Live API
+
+이 복잡함을 해결하기 위해 사용할 수 있는 것이 **Azure Voice Live API**입니다.
+
+Azure Voice Live API는 실시간 음성 대화에 필요한 기능을 하나의 흐름으로 제공해줍니다.
+
+따로 STT, LLM, TTS, 오디오 스트리밍, 대화 흐름 처리를 각각 직접 연결하지 않아도 됩니다.
+
+Voice Live API는 WebSocket을 기반으로 실시간 음성 대화 흐름을 처리합니다.
+
+즉, 사용자가 말하면 API가 음성을 받고, AI 응답을 생성하고, 다시 음성으로 돌려주는 구조를 하나의 세션 안에서 처리할 수 있습니다.
+
+```
+사용자 음성 입력
+→ Voice Live API
+→ 음성 인식
+→ AI 답변 생성
+→ 음성 출력
+→ 사용자에게 응답
+```
+
+---
+
+# Microsoft Foundry 이해하기
+
+---
+
+## Voice Live API는 Foundry의 기능 중 하나
+
+Voice Live API는 Microsoft Foundry에서 사용할 수 있는 기능 중 하나입니다.
+
+그래서 Voice Live API를 이해하기 전에 먼저 Foundry가 무엇인지 알아야 합니다.
+
+---
+
+## Microsoft Foundry란?
+
+Microsoft Foundry는 쉽게 말해서 **AI 앱과 AI 에이전트를 만들고, 배포하고, 운영하기 위한 플랫폼**입니다.
+
+Foundry는 AI 모델, 에이전트, 음성 AI, 문서 분석, 데이터 분석 같은 기능을 한곳에서 사용할 수 있게 해줍니다.
+
+개발자는 이 기능들을 가져와서 자기 서비스에 붙일 수 있습니다.
+
+---
+
+## Foundry는 PaaS에 가깝다
+
+여기서 중요한 점은 Foundry가 완성된 앱을 그냥 사용하는 서비스가 아니라는 점입니다.
+
+듀오링고나 ChatGPT 앱처럼 사용자가 들어가서 바로 쓰는 서비스는 SaaS에 가깝습니다.
+
+반면 Foundry는 개발자가 AI 기능을 자신의 프로그램에 적용하기 위해 사용하는 플랫폼입니다.
+
+즉, Foundry는 일반 사용자가 완성된 앱을 소비하는 공간이라기보다, 개발자가 AI 서비스를 만들기 위해 사용하는 개발 플랫폼입니다.
+
+기본적인 개발 지식은 필요합니다.
+
+API를 연결하고, 모델을 선택하고, 서비스 구조에 맞게 기능을 붙이는 과정이 필요합니다.
+
+하지만 AI 서비스를 직접 만들고 배포하려는 개발자에게는 매우 강력한 개발 환경입니다.
+
+---
+
+## Foundry에서 할 수 있는 것
+
+Foundry 안에서는 다양한 AI 모델을 찾아보고 배포할 수 있습니다.
+
+모델 카탈로그에는 OpenAI, Meta, Hugging Face 등 여러 제공자의 모델이 포함되어 있습니다.
+
+또한 Foundry는 단순히 모델만 제공하는 것이 아닙니다.
+
+에이전트, 문서 분석, 데이터 분석, 음성 AI 같은 기능도 함께 제공합니다.
+
+즉, 개발자는 목적에 맞는 AI 기능을 Foundry 안에서 선택하고 자신의 서비스에 연결할 수 있습니다.
+
+---
+
+# Voice Live API의 구성
+
+---
+
+## Voice Live API는 무엇으로 이루어져 있나?
+
+Voice Live API는 크게 다음 요소들이 함께 동작하는 구조입니다.
+
+```
+Voice AI
+LLM
+Agent
+```
+
+Voice AI는 사용자의 음성을 처리하고 AI의 음성을 생성하는 부분입니다.
+
+LLM은 사용자의 말을 이해하고 답변을 생성하는 부분입니다.
+
+Agent는 대화 목적과 역할을 설정하고, 상황에 맞게 대화 흐름을 관리하는 부분입니다.
+
+즉, Voice Live API는 단순히 음성을 텍스트로 바꾸는 기능이 아니라, 음성 대화 전체를 구성하는 기능입니다.
+
+---
+
+# Voice Live API 주요 기능
+
+---
+
+## 1. 다양한 언어 지원
+
+Voice Live API는 여러 언어를 지원합니다.
+
+자동 다국어 구성에서는 주요 지역 언어를 지원합니다.
+
+같은 언어라도 지역에 따라 차이가 있을 수 있습니다.
+
+예를 들어 영어도 하나로 끝나는 것이 아니라 미국 영어, 영국 영어, 호주 영어, 캐나다 영어, 인도 영어처럼 나뉩니다.
+
+지원되는 주요 언어에는 영어, 중국어, 프랑스어, 독일어, 힌디어, 이탈리아어, 일본어, 한국어, 스페인어 등이 있습니다.
+
+즉, 실시간 음성 대화를 만들 때 한국어와 영어를 포함한 여러 언어 환경에서 활용할 수 있습니다.
+
+---
+
+## 2. 사용자 지정 페르소나 설정
+
+Voice Live API에서는 AI의 페르소나와 응답 방식을 설정할 수 있습니다.
+
+말투, 성격, 대화 방식, 답변 기준을 정해주면 AI가 그 설정에 맞춰 응답합니다.
+
+예를 들어 같은 AI 모델을 사용하더라도 페르소나에 따라 완전히 다른 서비스가 됩니다.
+
+**영어 코치**라는 페르소나를 부여하면 사용자의 문장을 교정하고 더 자연스러운 표현을 추천하는 코치가 됩니다.
+
+**고객 상담원**이라는 페르소나를 부여하면 사용자의 질문에 답하고 문제 해결을 도와주는 상담봇이 됩니다.
+
+**회사 매뉴얼 가이드**라는 페르소나를 부여하면 내부 문서나 업무 절차를 기반으로 안내해주는 시스템이 됩니다.
+
+즉, AI 모델 자체는 동일하더라도 어떤 페르소나와 목적을 부여하느냐에 따라 완전히 다른 서비스로 동작합니다.
+
+---
+
+## 3. 고품질 대화 설정
+
+Voice Live API는 대화 품질을 높이기 위한 설정도 제공합니다.
+
+주변 소음을 줄여주는 **노이즈 억제** 기능이 있습니다.
+
+AI의 목소리가 다시 마이크에 들어가는 것을 막는 **에코 제거** 기능도 있습니다.
+
+사용자가 중간에 말을 끊는 상황을 인식하는 기능도 필요합니다.
+
+또 사용자가 잠깐 멈췄다고 해서 바로 대화를 끝내는 것이 아니라, 자연스러운 일시정지를 허용하는 턴 종료 감지도 중요합니다.
+
+이런 기능 덕분에 단순한 음성 인식이 아니라 실제 사람과 대화하는 것처럼 자연스러운 흐름을 만들 수 있습니다.
+
+---
+
+## 4. 아바타 선택
+
+Voice Live API에서는 아바타 기능도 활용할 수 있습니다.
+
+AI가 말할 때 입모양과 표정이 음성에 맞춰 움직이는 아바타를 사용할 수 있습니다.
+
+이 기능을 사용하면 사용자는 단순히 음성만 듣는 것이 아니라, 실제 사람과 대화하는 것처럼 시각적인 피드백도 받을 수 있습니다.
+
+이번 데모에서는 Foundry에서 지원하는 아바타 중 하나를 선택해서 사용합니다.
+
+AI가 음성으로 말할 때 입모양과 표정이 실시간으로 동기화되어 더 자연스러운 대화 경험을 제공합니다.
+
+---
+
+## 5. VoiceRAG
+
+다음 기능은 **VoiceRAG**입니다.
+
+VoiceRAG를 이해하려면 먼저 기존 LLM의 한계를 알아야 합니다.
+
+기존 LLM은 두 가지 한계를 가질 수 있습니다.
+
+첫 번째는 **정보의 최신성 부족**입니다.
+
+모델이 학습된 시점 이후의 최신 정보는 알지 못할 수 있습니다.
+
+두 번째는 **전문 지식의 부재**입니다.
+
+학습 데이터에 포함되지 않은 특정 기업 내부 문서나 전문 분야의 지식은 부족할 수 있습니다.
+
+이런 한계 때문에 AI가 사실이 아닌 내용을 그럴듯하게 말하는 할루시네이션이 발생할 수 있습니다.
+
+이를 줄이기 위해 사용하는 방식이 RAG입니다.
+
+---
+
+## RAG란?
+
+RAG는 **Retrieval Augmented Generation**의 약자입니다.
+
+한국어로는 **검색 증강 생성**이라고 할 수 있습니다.
+
+LLM이 답변을 생성하기 전에 신뢰할 수 있는 외부 지식 베이스에서 관련 정보를 먼저 검색하고, 그 내용을 바탕으로 답변을 생성하는 방식입니다.
+
+```
+Retrieval
+→ 관련 정보 검색
+
+Augmented
+→ 검색한 정보로 답변 보강
+
+Generation
+→ 답변 생성
+```
+
+즉, RAG는 LLM에 외부 지식 검색을 결합해서 답변의 정확성과 최신성을 높이는 방식입니다.
+
+---
+
+## VoiceRAG란?
+
+VoiceRAG는 이 RAG 기술을 음성 대화에 적용한 것입니다.
+
+```
+VoiceRAG = Voice + RAG
+```
+
+흐름은 다음과 같습니다.
+
+```
+듣기 → 찾기 → 말하기
+```
+
+사용자의 질문을 음성으로 듣고, 필요한 정보를 외부 지식에서 검색한 뒤, 그 내용을 바탕으로 음성으로 답변합니다.
+
+예를 들어 회사 내부 보안 문서를 AI 모델에 직접 학습시키지 않았더라도, VoiceRAG를 활용하면 해당 문서에서 필요한 정보를 찾아 직원의 질문에 답변하게 만들 수 있습니다.
+
+이번 AI 영어 코치에서는 실제 사용하는 표현이나 더 자연스러운 표현을 외부 정보에서 찾아와 답변에 활용하는 방식으로 확장할 수 있습니다.
+
+---
+
+## 6. 모델 선택 기능
+
+Voice Live API와 Foundry를 활용하면 생성 AI 모델을 유연하게 선택할 수 있습니다.
+
+예를 들어 GPT-5, GPT-4.1, GPT-4o 같은 모델을 상황에 따라 바꿔 사용할 수 있습니다.
+
+더 정확하고 깊은 답변이 필요하면 성능이 높은 모델을 사용할 수 있습니다.
+
+반대로 빠른 응답이 더 중요하다면 상대적으로 가벼운 모델을 선택할 수 있습니다.
+
+즉, 서비스 목적에 따라 모델을 선택할 수 있다는 점도 Foundry 기반 개발의 장점입니다.
+
+---
+
+# 전체 작동 흐름 설계도
+
+---
+
+## 사용자가 보는 흐름
+
+사용자가 보는 서비스 흐름은 단순합니다.
+
+```
+1. 사용자가 영어로 말한다.
+2. AI 영어 코치가 사용자의 말을 듣는다.
+3. AI가 문장을 이해한다.
+4. AI가 자연스러운 영어 표현이나 답변을 만든다.
+5. AI가 음성으로 다시 답변한다.
+6. 필요하면 아바타가 함께 말한다.
+```
+
+사용자 입장에서는 그냥 영어로 말하고 AI의 답변을 듣는 구조입니다.
+
+---
+
+## 내부 시스템 흐름
+
+내부적으로는 다음 구조로 동작합니다.
+
+```
+[사용자]
+  │
+  │ 마이크로 영어 발화
+  ▼
+[프론트엔드]
+  │
+  │ 오디오 조각을 WebSocket으로 전송
+  ▼
+[백엔드 서버]
+  │
+  │ Azure Voice Live API와 연결하는 프록시 역할
+  ▼
+[Azure Voice Live API]
+  │
+  ├─ STT: 음성을 텍스트로 변환
+  ├─ LLM: 의미 이해 및 답변 생성
+  ├─ TTS: 답변을 음성으로 변환
+  ├─ VAD: 사용자의 말 종료 시점 판단
+  ├─ Noise Reduction: 노이즈 억제
+  ├─ Echo Cancellation: 에코 제거
+  └─ Avatar: 아바타 이벤트 생성
+  │
+  ▼
+[백엔드 서버]
+  │
+  │ 전사 결과, AI 응답, 음성, 아바타 이벤트 수신
+  ▼
+[프론트엔드]
+  │
+  │ 사용자에게 음성 및 화면으로 출력
+  ▼
+[사용자]
+```
+
+---
+
+# DEMO 설계
+
+---
+
+## 데모 목표
+
+이번 데모의 목표는 **현지인 영어 코치 AI**를 구현한 구조를 보여주는 것입니다.
+
+사용자가 영어로 말하면 AI가 LLM을 통해 내용을 이해하고, 자연스럽게 영어로 응답하는 구조입니다.
+
+이 구조는 영어 코치뿐만 아니라 고객센터, 회사 매뉴얼 가이드, 면접 연습 서비스 등으로도 확장할 수 있습니다.
+
+---
+
+## 프로젝트 구조
+
+전체 프로젝트는 프론트엔드와 백엔드로 나뉩니다.
+
+```
+frontend/src
+→ 사용자의 마이크 입력 처리
+→ WebSocket 연결
+→ 채팅 UI
+→ 아바타 연결
+
+backend/src
+→ 시나리오 관리
+→ Agent 설정 생성
+→ Azure Voice Live API 연결
+→ 프록시 서버 역할
+```
+
+프론트엔드는 사용자가 직접 상호작용하는 부분입니다.
+
+백엔드는 Azure Voice Live API와 연결하고 인증 정보, 모델 설정, 에이전트 설정을 관리합니다.
+
+---
+
+## 1. 백엔드 WebSocket 엔드포인트
+
+백엔드의 진입점은 다음 파일입니다.
+
+```
+backend/src/app.py:215
+```
+
+여기에는 `/ws/voice`라는 WebSocket 엔드포인트가 있습니다.
+
+이 엔드포인트는 HTTP처럼 요청하고 응답받고 끝나는 방식이 아닙니다.
+
+브라우저와 서버 사이의 연결을 계속 열어둡니다.
+
+덕분에 다음 데이터들이 실시간으로 오갈 수 있습니다.
+
+```
+마이크 오디오
+전사 결과
+AI 응답 음성
+아바타 이벤트
+```
+
+즉, `/ws/voice`는 프론트엔드와 백엔드 사이의 실시간 음성 대화 통로입니다.
+
+---
+
+## 2. 프론트엔드 WebSocket 연결
+
+프론트엔드에서는 다음 파일에서 WebSocket 연결을 만듭니다.
+
+```
+frontend/src/hooks/useRealtime.ts:30
+```
+
+연결이 열리면 먼저 `session.update` 이벤트로 Agent ID를 보냅니다.
+
+이 Agent ID를 기준으로 서버는 어떤 시나리오와 어떤 설정으로 Voice Live 세션을 만들지 결정합니다.
+
+```
+프론트엔드 WebSocket 연결
+→ session.update 전송
+→ Agent ID 전달
+→ 백엔드가 해당 Agent 설정 확인
+→ Voice Live 세션 생성
+```
+
+즉, Agent ID는 어떤 역할의 AI를 실행할지 알려주는 기준입니다.
+
+---
+
+## 3. 마이크 오디오 스트리밍
+
+사용자가 말을 시작하면 프론트엔드에서 마이크 오디오 조각을 계속 보냅니다.
+
+관련 파일은 다음과 같습니다.
+
+```
+frontend/src/app/App.tsx:133
+```
+
+여기서 마이크 오디오 조각을 `input_audio_buffer.append` 이벤트로 계속 전송합니다.
+
+중요한 점은 사용자가 문장을 다 말한 뒤 한 번에 보내는 것이 아니라는 점입니다.
+
+말하는 중에도 작은 오디오 조각들이 계속 스트리밍됩니다.
+
+```
+사용자 발화
+→ 오디오 조각 생성
+→ input_audio_buffer.append
+→ WebSocket으로 계속 전송
+```
+
+이 구조 덕분에 AI는 사용자의 말을 실시간으로 처리할 수 있습니다.
+
+---
+
+## 4. 백엔드에서 Azure Voice Live API 연결
+
+백엔드의 핵심 파일은 다음입니다.
+
+```
+backend/src/services/websocket_handler.py:96
+```
+
+여기서 Azure Voice Live API와 연결합니다.
+
+브라우저가 Azure에 직접 연결되는 것이 아니라, 우리 서버가 중간 프록시 역할을 합니다.
+
+```
+브라우저
+→ 우리 백엔드 서버
+→ Azure Voice Live API
+```
+
+백엔드 서버는 인증 정보, 모델 이름, Agent 설정을 가지고 Azure Voice Live 세션을 열어줍니다.
+
+이 구조를 사용하면 Azure 인증 정보가 프론트엔드에 노출되지 않고, 서버에서 안전하게 관리할 수 있습니다.
+
+---
+
+## 5. Voice Live 세션 설정
+
+세션 설정은 다음 위치에 있습니다.
+
+```
+backend/src/services/websocket_handler.py:230
+```
+
+이 설정에서는 `TEXT`, `AUDIO`, `AVATAR` 세 가지 modality를 사용합니다.
+
+```
+TEXT
+→ 전사 결과와 텍스트 응답 처리
+
+AUDIO
+→ 사용자 음성과 AI 음성 처리
+
+AVATAR
+→ 아바타 입모양, 표정, 동작 이벤트 처리
+```
+
+여기서 중요한 설정 중 하나가 `AzureSemanticVad`입니다.
+
+`AzureSemanticVad`는 사용자의 말이 끝났는지, 잠깐 쉰 것인지 판단하는 역할을 합니다.
+
+이 턴 종료 감지가 자연스러운 대화 타이밍의 핵심입니다.
+
+같은 세션 설정 안에서 노이즈 억제와 에코 제거도 지정합니다.
+
+실제 음성 대화에서는 주변 소음이나 스피커에서 나온 AI 목소리가 다시 마이크로 들어오는 문제가 생길 수 있습니다.
+
+Voice Live API는 이런 부분을 세션 설정으로 처리할 수 있어서, 개발자가 오디오 처리 로직을 모두 직접 만들 필요가 줄어듭니다.
+
+---
+
+## 6. 양방향 포워딩 구조
+
+마지막 핵심은 양방향 포워딩 구조입니다.
+
+관련 위치는 다음입니다.
+
+```
+backend/src/services/websocket_handler.py:254
+```
+
+이 구조에서는 두 가지 작업이 동시에 일어납니다.
+
+첫 번째 작업은 사용자의 오디오를 Azure로 계속 보내는 것입니다.
+
+두 번째 작업은 Azure에서 오는 전사 결과, LLM 응답, TTS 오디오, 아바타 이벤트를 브라우저로 즉시 돌려보내는 것입니다.
+
+```
+작업 1:
+브라우저 오디오
+→ 백엔드
+→ Azure Voice Live API
+
+작업 2:
+Azure Voice Live API 응답
+→ 백엔드
+→ 브라우저
+```
+
+즉, STT, LLM, TTS를 각각 따로 붙이는 것이 아닙니다.
+
+Voice Live API 세션 하나 안에서 실시간 대화 흐름을 처리하는 구조입니다.
+
+## Third-party Notice
+
+This project includes or is based on software originally licensed under the MIT License by Microsoft Corporation.
+
+Original copyright:
+Copyright (c) Microsoft Corporation.
+
+The original MIT License notice is included in `THIRD_PARTY_LICENSES/Microsoft-LICENSE.txt`.
